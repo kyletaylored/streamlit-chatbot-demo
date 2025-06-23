@@ -4,14 +4,14 @@ import os
 import uuid
 from dotenv import load_dotenv
 from ddtrace.llmobs import LLMObs
-from ddtrace.llmobs.decorators import llm, workflow, task, agent
+from ddtrace.llmobs.decorators import llm, workflow, task, agent, tool, retrieval, embedding
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize Datadog LLM Observability with environment variables
 LLMObs.enable(
-    ml_app=os.getenv("DD_ML_APP_NAME"),
+    ml_app=os.getenv("DD_ML_APP_NAME", "Streamlit Demo App"),
     api_key=os.getenv("DD_API_KEY"),
     site=os.getenv("DD_SITE", "datadoghq.com"),
     agentless_enabled=True,
@@ -122,6 +122,14 @@ else:
         
         if not prompt:
             return None
+        
+        # Tool: log user input metadata
+        @tool(name="logger_tool", session_id=session_id, ml_app=ml_app_name)
+        def log_user_input(prompt: str):
+            return f"User input length: {len(prompt)}"
+
+        log_metadata = log_user_input(prompt)
+        LLMObs.annotate(metadata={"log_tool_output": log_metadata})
             
         # Track the conversation with the workflow decorator
         @workflow(
@@ -130,6 +138,15 @@ else:
             ml_app=ml_app_name
         )
         def handle_conversation(user_prompt):
+
+            @retrieval(name="retrieve_context", session_id=session_id, ml_app=ml_app_name)
+            def retrieve_context(prompt: str):
+                return [{"title": "Example Doc", "content": "This is background info."}]
+
+            @embedding(model_name="mock-embedder", session_id=session_id, ml_app=ml_app_name)
+            def embed_prompt(prompt: str):
+                return [float(len(prompt))] * 384
+
             # Track the input processing with the task decorator
             @task(
                 name="process_input",
@@ -137,6 +154,7 @@ else:
                 ml_app=ml_app_name
             )
             def process_input(text):
+                log_user_input(text)
                 processed = process_user_input(text)
                 LLMObs.annotate(
                     input_data=text,
@@ -148,6 +166,14 @@ else:
             
             # Process the input
             messages = process_input(user_prompt)
+
+            # Simulate embedding vector
+            embedding_vector = embed_prompt(user_prompt)
+            LLMObs.annotate(metadata={"embedding_vector_norm": sum(embedding_vector)})
+
+            # Simulate retrieval step
+            retrieved_docs = retrieve_context(user_prompt)
+            LLMObs.annotate(metadata={"retrieved_docs": len(retrieved_docs)})
             
             # Get model response
             stream = generate_llm_response(messages)
