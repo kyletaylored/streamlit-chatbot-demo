@@ -1,4 +1,4 @@
-# 💬 Chatbot Template
+# Datadog Streamlit LLM Example
 
 A simple Streamlit app that shows how to build a chatbot using OpenAI's GPT-3.5, instrumented with **Datadog LLM Observability** for full pipeline tracing.
 
@@ -6,7 +6,7 @@ A simple Streamlit app that shows how to build a chatbot using OpenAI's GPT-3.5,
 
 ---
 
-## 🚀 How to Run Locally
+## How to Run Locally
 
 1. Install the requirements
 
@@ -30,9 +30,10 @@ A simple Streamlit app that shows how to build a chatbot using OpenAI's GPT-3.5,
    DD_SERVICE=streamlit-chatbot
    ```
 
+4. If running in Github Codespaces, add these variables in your Codespace Secrets.
 ---
 
-## 🧠 LLM Observability with Datadog
+## LLM Observability with Datadog
 
 This project uses [`ddtrace.llmobs`](https://docs.datadoghq.com/llm_observability/setup/sdk/python/) to track LLM interactions in Datadog.
 
@@ -59,7 +60,7 @@ The app also uses `LLMObs.annotate()` to log:
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 * [Streamlit](https://streamlit.io)
 * [OpenAI Python SDK](https://github.com/openai/openai-python)
@@ -67,7 +68,7 @@ The app also uses `LLMObs.annotate()` to log:
 
 ---
 
-## 📈 Dashboards & Monitoring
+## Dashboards & Monitoring
 
 You can visualize all spans and enrichments in the Datadog APM > Traces Explorer. For enhanced insight, set up a custom dashboard filtered by:
 
@@ -76,6 +77,6 @@ You can visualize all spans and enrichments in the Datadog APM > Traces Explorer
 
 ---
 
-## 📄 License
+## License
 
 MIT
